@@ -6,6 +6,7 @@ import org.example.repository.TicketRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -27,8 +28,22 @@ public class TicketService {
         creatOrUpdateTicket(ticketInfo);
     }
 
+    public void updateTicketUsed(TicketInfo ticketInfo){
+        TicketInfo ticketInfoNew=ticketInfo.toBuilder()
+                .used(true).build();
+        creatOrUpdateTicket(ticketInfoNew);
+    }
+
+    public Optional<TicketInfo> getTicketInfo(String ticketId){
+        return ticketRepo.findByTicketId(ticketId);
+    }
+
     private void creatOrUpdateTicket(TicketInfo ticketInfo){
+             boolean use=ticketInfo.isUsed();
         Function<TicketInfo,TicketInfo> updatingTicket=ticket->{
+            if(use){
+                ticket.setUsed(true);
+            }
                 return ticketRepo.save(ticket);
         };
 
@@ -40,4 +55,7 @@ public class TicketService {
                 .map(updatingTicket)
                 .orElseGet(createUser);
     }
+
+
+
 }

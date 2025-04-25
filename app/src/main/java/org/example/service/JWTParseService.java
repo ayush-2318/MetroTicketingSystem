@@ -1,11 +1,15 @@
 package org.example.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.util.Pair;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.example.model.TicketInfoDto;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.Map;
 
 @Service
@@ -20,12 +24,17 @@ public class JWTParseService {
     }
 
     private Map<String, Object> parseJwt(String jwtToken){
-        Claims claims= Jwts.parser()
-                .setSigningKey(SecretKey)
-                .build()
-                .parseClaimsJws(jwtToken)
-                .getBody();
-        return (Map<String, Object>) claims.get("ticketInfo");
+        try {
+            Claims claims= Jwts.parser()
+                    .setSigningKey(SecretKey)
+                    .build()
+                    .parseClaimsJws(jwtToken)
+                    .getBody();
+            return (Map<String, Object>) claims.get("ticketInfo");
+        }catch (ExpiredJwtException e){
+            throw new RuntimeException("Jwt token expired",e);
+        }
+
     }
 
 
